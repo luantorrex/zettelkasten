@@ -13,3 +13,19 @@ This repository contains the skeleton of an MVC-based microservice that will per
 ## Status
 
 Implementation is not yet complete. Future commits will include the API source code and setup instructions.
+
+## Getting Started
+
+1. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+2. Run the development server:
+
+```bash
+uvicorn app.main:app --reload
+```
+
+The API will be available at `http://localhost:8000`.
