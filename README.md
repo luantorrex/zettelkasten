@@ -9,6 +9,7 @@ This repository contains the skeleton of an MVC-based microservice that will per
 - **Architecture**: Model–View–Controller (MVC)
 - **Database**: MongoDB
 - **Features**: Create, read, update, and delete notes
+- **CORS**: Enabled for all origins by default
 
 ## Status
 
