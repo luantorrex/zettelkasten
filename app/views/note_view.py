@@ -15,7 +15,10 @@ router = APIRouter()
 
 @router.post("/", response_model=Note, status_code=status.HTTP_201_CREATED)
 async def create(data: NoteCreate):
-    return await create_note(data)
+    try:
+        return await create_note(data)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @router.get("/", response_model=List[Note])
@@ -33,7 +36,10 @@ async def show(note_id: str):
 
 @router.put("/{note_id}", response_model=Note)
 async def update(note_id: str, data: NoteUpdate):
-    note = await update_note(note_id, data)
+    try:
+        note = await update_note(note_id, data)
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
     if note is None:
         raise HTTPException(status_code=404, detail="Note not found")
     return note
