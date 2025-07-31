@@ -1,5 +1,6 @@
 from bson import ObjectId
 from typing import List, Optional
+import logging
 
 from ..database import db
 from ..models.note import Note, NoteCreate, NoteUpdate
@@ -7,14 +8,19 @@ from ..models.note import Note, NoteCreate, NoteUpdate
 collection = db["notes"]
 users_collection = db["users"]
 
+logger = logging.getLogger(__name__)
+
 
 async def create_note(data: NoteCreate) -> Note:
+    logger.info("Creating note for user %s with title '%s'", data.userId, data.title)
     if not await users_collection.find_one({"_id": ObjectId(data.userId)}):
+        logger.error("User %s not found", data.userId)
         raise ValueError("User not found")
 
     note_data = data.model_dump(by_alias=True)
     note_data["user_id"] = ObjectId(note_data["user_id"])
     result = await collection.insert_one(note_data)
+    logger.info("Note inserted with id %s", result.inserted_id)
     doc = await collection.find_one({"_id": result.inserted_id})
     return Note(**doc)
 

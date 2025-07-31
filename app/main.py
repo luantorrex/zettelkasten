@@ -1,7 +1,10 @@
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from .views.note_view import router as note_router
 from .views.user_view import router as user_router
+
+logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(title="Zettelkasten API")
 
