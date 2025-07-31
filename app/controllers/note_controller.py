@@ -18,7 +18,7 @@ async def create_note(data: NoteCreate) -> Note:
         raise ValueError("User not found")
 
     note_data = data.model_dump(by_alias=True)
-    note_data["user_id"] = ObjectId(note_data["user_id"])
+    note_data["userId"] = ObjectId(note_data["userId"])
     result = await collection.insert_one(note_data)
     logger.info("Note inserted with id %s", result.inserted_id)
     doc = await collection.find_one({"_id": result.inserted_id})
@@ -39,10 +39,10 @@ async def get_note(note_id: str) -> Optional[Note]:
 
 async def update_note(note_id: str, data: NoteUpdate) -> Optional[Note]:
     update_data = data.model_dump(exclude_unset=True, by_alias=True)
-    if "user_id" in update_data:
-        if not await users_collection.find_one({"_id": ObjectId(update_data["user_id"])}):
+    if "userId" in update_data:
+        if not await users_collection.find_one({"_id": ObjectId(update_data["userId"])}):
             raise ValueError("User not found")
-        update_data["user_id"] = ObjectId(update_data["user_id"])
+        update_data["userId"] = ObjectId(update_data["userId"])
 
     await collection.update_one({"_id": ObjectId(note_id)}, {"$set": update_data})
     return await get_note(note_id)
