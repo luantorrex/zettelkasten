@@ -20,20 +20,20 @@ async def list_users() -> List[User]:
     return users
 
 
-async def get_user(user_id: str) -> Optional[User]:
-    doc = await collection.find_one({"_id": ObjectId(user_id)})
+async def get_user(userId: str) -> Optional[User]:
+    doc = await collection.find_one({"_id": ObjectId(userId)})
     return User(**doc) if doc else None
 
 
-async def update_user(user_id: str, data: UserUpdate) -> Optional[User]:
+async def update_user(userId: str, data: UserUpdate) -> Optional[User]:
     await collection.update_one(
-        {"_id": ObjectId(user_id)}, {"$set": data.model_dump(exclude_unset=True)}
+        {"_id": ObjectId(userId)}, {"$set": data.model_dump(exclude_unset=True)}
     )
-    return await get_user(user_id)
+    return await get_user(userId)
 
 
-async def delete_user(user_id: str) -> bool:
-    result = await collection.delete_one({"_id": ObjectId(user_id)})
+async def delete_user(userId: str) -> bool:
+    result = await collection.delete_one({"_id": ObjectId(userId)})
     return result.deleted_count == 1
 
 

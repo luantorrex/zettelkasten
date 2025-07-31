@@ -24,25 +24,25 @@ async def index():
     return await list_users()
 
 
-@router.get("/{user_id}", response_model=User)
-async def show(user_id: str):
-    user = await get_user(user_id)
+@router.get("/{userId}", response_model=User)
+async def show(userId: str):
+    user = await get_user(userId)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
 
-@router.put("/{user_id}", response_model=User)
-async def update(user_id: str, data: UserUpdate):
-    user = await update_user(user_id, data)
+@router.put("/{userId}", response_model=User)
+async def update(userId: str, data: UserUpdate):
+    user = await update_user(userId, data)
     if user is None:
         raise HTTPException(status_code=404, detail="User not found")
     return user
 
 
-@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
-async def destroy(user_id: str):
-    success = await delete_user(user_id)
+@router.delete("/{userId}", status_code=status.HTTP_204_NO_CONTENT)
+async def destroy(userId: str):
+    success = await delete_user(userId)
     if not success:
         raise HTTPException(status_code=404, detail="User not found")
 
