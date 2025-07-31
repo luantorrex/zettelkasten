@@ -1,13 +1,14 @@
 from fastapi import APIRouter, HTTPException, status
 from typing import List
 
-from ..models.user import User, UserCreate, UserUpdate
+from ..models.user import User, UserCreate, UserLogin, UserUpdate
 from ..controllers.user_controller import (
     create_user,
     list_users,
     get_user,
     update_user,
     delete_user,
+    find_user_by_credentials,
 )
 
 router = APIRouter()
@@ -44,3 +45,11 @@ async def destroy(user_id: str):
     success = await delete_user(user_id)
     if not success:
         raise HTTPException(status_code=404, detail="User not found")
+
+
+@router.post("/verify", response_model=User)
+async def verify(data: UserLogin):
+    user = await find_user_by_credentials(data.username, data.email, data.password)
+    if user is None:
+        raise HTTPException(status_code=400, detail="User not found")
+    return user
