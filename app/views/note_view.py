@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, status
 from typing import List
+import logging
 
 from ..models.note import Note, NoteCreate, NoteUpdate
 from ..controllers.note_controller import (
@@ -12,12 +13,18 @@ from ..controllers.note_controller import (
 
 router = APIRouter()
 
+logger = logging.getLogger(__name__)
+
 
 @router.post("/", response_model=Note, status_code=status.HTTP_201_CREATED)
 async def create(data: NoteCreate):
+    logger.info("POST /notes/ with data: %s", data)
     try:
-        return await create_note(data)
+        note = await create_note(data)
+        logger.info("Note created with id %s", note.id)
+        return note
     except ValueError as e:
+        logger.error("Error creating note: %s", e)
         raise HTTPException(status_code=404, detail=str(e))
 
 
