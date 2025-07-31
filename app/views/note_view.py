@@ -19,6 +19,7 @@ logger = logging.getLogger(__name__)
 @router.post("/", response_model=Note, status_code=status.HTTP_201_CREATED)
 async def create(data: NoteCreate):
     logger.info("POST /notes/ with data: %s", data)
+    print(f"POST /notes/ parameters: {data.model_dump()}")
     try:
         note = await create_note(data)
         logger.info("Note created with id %s", note.id)
