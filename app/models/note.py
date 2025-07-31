@@ -6,7 +6,7 @@ from typing import Optional
 class NoteBase(BaseModel):
     title: str
     content: str
-    user_id: str
+    userId: str = Field(alias="user_id")
 
 
 class NoteCreate(NoteBase):
@@ -16,7 +16,7 @@ class NoteCreate(NoteBase):
 class NoteUpdate(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
-    user_id: Optional[str] = None
+    userId: Optional[str] = Field(default=None, alias="user_id")
 
 
 class Note(NoteBase):
@@ -30,7 +30,7 @@ class Note(NoteBase):
             return str(v)
         return v
 
-    @field_validator("user_id", mode="before")
+    @field_validator("userId", mode="before")
     def convert_user_id(cls, v):
         if isinstance(v, ObjectId):
             return str(v)
