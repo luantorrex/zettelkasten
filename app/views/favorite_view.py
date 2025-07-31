@@ -1,8 +1,14 @@
 from fastapi import APIRouter, HTTPException, status
+from typing import List
 import logging
 
 from ..models.favorite import Favorite, FavoriteCreate
-from ..controllers.favorite_controller import add_favorite, delete_favorite
+from ..models.note import Note
+from ..controllers.favorite_controller import (
+    add_favorite,
+    delete_favorite,
+    get_favorite_notes,
+)
 
 router = APIRouter()
 
@@ -18,6 +24,16 @@ async def create(data: FavoriteCreate):
         return favorite
     except ValueError as e:
         logger.error("Error creating favorite: %s", e)
+        raise HTTPException(status_code=404, detail=str(e))
+
+
+@router.get("/{user_id}", response_model=List[Note])
+async def index(user_id: str):
+    logger.info("GET /favorites/%s", user_id)
+    try:
+        return await get_favorite_notes(user_id)
+    except ValueError as e:
+        logger.error("Error listing favorites for user %s: %s", user_id, e)
         raise HTTPException(status_code=404, detail=str(e))
 
 
