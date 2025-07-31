@@ -35,3 +35,12 @@ async def update_user(user_id: str, data: UserUpdate) -> Optional[User]:
 async def delete_user(user_id: str) -> bool:
     result = await collection.delete_one({"_id": ObjectId(user_id)})
     return result.deleted_count == 1
+
+
+async def find_user_by_credentials(
+    username: str, email: str, password: str
+) -> Optional[User]:
+    doc = await collection.find_one(
+        {"username": username, "email": email, "password": password}
+    )
+    return User(**doc) if doc else None
