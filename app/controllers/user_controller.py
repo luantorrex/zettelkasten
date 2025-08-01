@@ -38,9 +38,9 @@ async def delete_user(userId: str) -> bool:
 
 
 async def find_user_by_credentials(
-    username: str, email: str, password: str
+    username: str, password: str
 ) -> Optional[User]:
     doc = await collection.find_one(
-        {"username": username, "email": email, "password": password}
+        {"username": username, "password": password}
     )
     return User(**doc) if doc else None

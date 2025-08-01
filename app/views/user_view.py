@@ -49,7 +49,7 @@ async def destroy(userId: str):
 
 @router.post("/verify", response_model=User)
 async def verify(data: UserLogin):
-    user = await find_user_by_credentials(data.username, data.email, data.password)
+    user = await find_user_by_credentials(data.username, data.password)
     if user is None:
         raise HTTPException(status_code=400, detail="User not found")
     return user
