@@ -32,6 +32,19 @@ async def list_notes() -> List[Note]:
     return notes
 
 
+async def list_notes_by_user(user_id: str) -> List[Note]:
+    logger.info("Listing notes for user %s", user_id)
+    if not await users_collection.find_one({"_id": ObjectId(user_id)}):
+        logger.error("User %s not found", user_id)
+        raise ValueError("User not found")
+
+    notes: List[Note] = []
+    cursor = collection.find({"userId": ObjectId(user_id)})
+    async for doc in cursor:
+        notes.append(Note(**doc))
+    return notes
+
+
 async def get_note(note_id: str) -> Optional[Note]:
     doc = await collection.find_one({"_id": ObjectId(note_id)})
     return Note(**doc) if doc else None
