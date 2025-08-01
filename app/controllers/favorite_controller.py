@@ -24,12 +24,14 @@ async def add_favorite(data: FavoriteCreate) -> Favorite:
         logger.error("Note %s not found", data.noteId)
         raise ValueError("Note not found")
 
-    favorite_data = data.model_dump(by_alias=True)
-    favorite_data["userId"] = ObjectId(favorite_data["userId"])
-    favorite_data["noteId"] = ObjectId(favorite_data["noteId"])
-    result = await favorites_collection.insert_one(favorite_data)
-    logger.info("Favorite inserted with id %s", result.inserted_id)
-    doc = await favorites_collection.find_one({"_id": result.inserted_id})
+    user_oid = ObjectId(data.userId)
+    note_oid = ObjectId(data.noteId)
+    await favorites_collection.update_one(
+        {"userId": user_oid},
+        {"$addToSet": {"noteIds": note_oid}},
+        upsert=True,
+    )
+    doc = await favorites_collection.find_one({"userId": user_oid}, {"_id": 0})
     return Favorite(**doc)
 
 
@@ -39,11 +41,11 @@ async def get_favorite_notes(user_id: str) -> List[Note]:
         logger.error("User %s not found", user_id)
         raise ValueError("User not found")
 
-    favorites_cursor = favorites_collection.find({"userId": ObjectId(user_id)})
-    note_ids = [fav["noteId"] async for fav in favorites_cursor]
-    if not note_ids:
+    doc = await favorites_collection.find_one({"userId": ObjectId(user_id)})
+    if not doc or not doc.get("noteIds"):
         return []
 
+    note_ids = doc["noteIds"]
     notes_cursor = notes_collection.find({"_id": {"$in": note_ids}})
     notes: List[Note] = []
     async for doc in notes_cursor:
@@ -52,5 +54,8 @@ async def get_favorite_notes(user_id: str) -> List[Note]:
 
 
 async def delete_favorite(note_id: str) -> bool:
-    result = await favorites_collection.delete_one({"noteId": ObjectId(note_id)})
-    return result.deleted_count == 1
+    result = await favorites_collection.update_one(
+        {"noteIds": ObjectId(note_id)},
+        {"$pull": {"noteIds": ObjectId(note_id)}},
+    )
+    return result.modified_count == 1
