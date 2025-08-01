@@ -1,29 +1,27 @@
 from bson import ObjectId
-from pydantic import BaseModel, Field, ConfigDict, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator
+from typing import List
 
 
-class FavoriteBase(BaseModel):
+class FavoriteCreate(BaseModel):
     userId: str
     noteId: str
 
 
-class FavoriteCreate(FavoriteBase):
-    pass
-
-
-class Favorite(FavoriteBase):
-    id: str = Field(alias="_id")
+class Favorite(BaseModel):
+    userId: str
+    noteIds: List[str] = Field(default_factory=list)
 
     model_config = ConfigDict(populate_by_name=True)
 
-    @field_validator("id", mode="before")
-    def convert_object_id(cls, v):
+    @field_validator("userId", mode="before")
+    def convert_user_id(cls, v):
         if isinstance(v, ObjectId):
             return str(v)
         return v
 
-    @field_validator("userId", "noteId", mode="before")
-    def convert_ids(cls, v):
-        if isinstance(v, ObjectId):
-            return str(v)
+    @field_validator("noteIds", mode="before")
+    def convert_note_ids(cls, v):
+        if isinstance(v, list):
+            return [str(i) if isinstance(i, ObjectId) else i for i in v]
         return v

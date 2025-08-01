@@ -20,7 +20,7 @@ async def create(data: FavoriteCreate):
     logger.info("POST /favorites/ with data: %s", data)
     try:
         favorite = await add_favorite(data)
-        logger.info("Favorite created with id %s", favorite.id)
+        logger.info("Favorite list updated for user %s", favorite.userId)
         return favorite
     except ValueError as e:
         logger.error("Error creating favorite: %s", e)
