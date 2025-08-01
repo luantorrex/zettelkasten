@@ -6,6 +6,7 @@ from ..models.note import Note, NoteCreate, NoteUpdate
 from ..controllers.note_controller import (
     create_note,
     list_notes,
+    list_notes_by_user,
     get_note,
     update_note,
     delete_note,
@@ -32,6 +33,16 @@ async def create(data: NoteCreate):
 @router.get("/", response_model=List[Note])
 async def index():
     return await list_notes()
+
+
+@router.get("/user/{user_id}", response_model=List[Note])
+async def by_user(user_id: str):
+    logger.info("GET /notes/user/%s", user_id)
+    try:
+        return await list_notes_by_user(user_id)
+    except ValueError as e:
+        logger.error("Error listing notes for user %s: %s", user_id, e)
+        raise HTTPException(status_code=404, detail=str(e))
 
 
 @router.get("/{note_id}", response_model=Note)
