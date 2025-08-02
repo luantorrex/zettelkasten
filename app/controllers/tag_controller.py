@@ -1,6 +1,7 @@
 import os
 import logging
 from typing import List, Optional
+from uuid import uuid4
 
 import boto3
 from boto3.dynamodb.conditions import Attr
@@ -22,8 +23,9 @@ table = dynamodb.Table(table_name)
 
 
 async def create_tag(data: TagCreate) -> Tag:
-    logger.info("Creating tag '%s' for user '%s'", data.tag_id, data.userId)
-    item = data.model_dump()
+    tag_id = str(uuid4())
+    logger.info("Creating tag '%s' for user '%s'", tag_id, data.userId)
+    item = {**data.model_dump(), "tag_id": tag_id}
     table.put_item(Item=item)
     return Tag(**item)
 
