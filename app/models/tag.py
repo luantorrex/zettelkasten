@@ -10,7 +10,6 @@ class TagBase(BaseModel):
 
 class TagCreate(TagBase):
     userId: str
-    tag_id: str
 
 
 class TagUpdate(BaseModel):
@@ -20,4 +19,4 @@ class TagUpdate(BaseModel):
 
 
 class Tag(TagCreate):
-    pass
+    tag_id: str
