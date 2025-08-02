@@ -1,17 +1,17 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import List
 
 
 class TagBase(BaseModel):
-    description: Optional[str] = None
+    tags: List[str]
 
 
 class TagCreate(TagBase):
-    tag: str
+    userId: str
 
 
 class TagUpdate(BaseModel):
-    description: Optional[str] = None
+    tags: List[str]
 
 
 class Tag(TagCreate):
