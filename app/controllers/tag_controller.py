@@ -1,6 +1,6 @@
 import os
 import logging
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 import boto3
 
@@ -21,44 +21,48 @@ table = dynamodb.Table(table_name)
 
 
 async def create_tag(data: TagCreate) -> Tag:
-    logger.info("Creating tag '%s'", data.tag)
+    logger.info("Creating tags for user '%s'", data.userId)
     item = data.model_dump()
     table.put_item(Item=item)
     return Tag(**item)
 
 
-async def list_tags() -> List[Tag]:
+async def list_tags() -> Dict[str, List[str]]:
     logger.info("Listing all tags")
     response = table.scan()
     items = response.get("Items", [])
-    return [Tag(**item) for item in items]
+    return {item["userId"]: item.get("tags", []) for item in items}
 
 
-async def get_tag(tag_name: str) -> Optional[Tag]:
-    logger.info("Fetching tag '%s'", tag_name)
-    response = table.get_item(Key={"tag": tag_name})
+async def get_tag(user_id: str) -> Optional[Dict[str, List[str]]]:
+    logger.info("Fetching tags for user '%s'", user_id)
+    response = table.get_item(Key={"userId": user_id})
     item = response.get("Item")
-    return Tag(**item) if item else None
+    if item:
+        return {user_id: item.get("tags", [])}
+    return None
 
 
-async def update_tag(tag_name: str, data: TagUpdate) -> Optional[Tag]:
-    logger.info("Updating tag '%s'", tag_name)
+async def update_tag(user_id: str, data: TagUpdate) -> Optional[Tag]:
+    logger.info("Updating tags for user '%s'", user_id)
     update_data = data.model_dump(exclude_unset=True)
     if not update_data:
-        return await get_tag(tag_name)
-    update_expr = "SET " + ", ".join(f"#{k}=:{k}" for k in update_data)
-    expr_attr_names = {f"#{k}": k for k in update_data}
-    expr_attr_values = {f":{k}": v for k, v in update_data.items()}
+        existing = await get_tag(user_id)
+        if existing:
+            return Tag(userId=user_id, tags=existing[user_id])
+        return None
     table.update_item(
-        Key={"tag": tag_name},
-        UpdateExpression=update_expr,
-        ExpressionAttributeNames=expr_attr_names,
-        ExpressionAttributeValues=expr_attr_values,
+        Key={"userId": user_id},
+        UpdateExpression="SET tags=:tags",
+        ExpressionAttributeValues={":tags": update_data["tags"]},
     )
-    return await get_tag(tag_name)
+    updated = await get_tag(user_id)
+    if updated:
+        return Tag(userId=user_id, tags=updated[user_id])
+    return None
 
 
-async def delete_tag(tag_name: str) -> bool:
-    logger.info("Deleting tag '%s'", tag_name)
-    response = table.delete_item(Key={"tag": tag_name}, ReturnValues="ALL_OLD")
+async def delete_tag(user_id: str) -> bool:
+    logger.info("Deleting tags for user '%s'", user_id)
+    response = table.delete_item(Key={"userId": user_id}, ReturnValues="ALL_OLD")
     return "Attributes" in response

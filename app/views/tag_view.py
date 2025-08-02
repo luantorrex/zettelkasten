@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, status
-from typing import List
+from typing import Dict, List
 import logging
 
 from ..models.tag import Tag, TagCreate, TagUpdate
@@ -21,29 +21,29 @@ async def create(data: TagCreate):
     return await create_tag(data)
 
 
-@router.get("/", response_model=List[Tag])
+@router.get("/", response_model=Dict[str, List[str]])
 async def index():
     return await list_tags()
 
 
-@router.get("/{tag}", response_model=Tag)
-async def show(tag: str):
-    result = await get_tag(tag)
+@router.get("/{user_id}", response_model=Dict[str, List[str]])
+async def show(user_id: str):
+    result = await get_tag(user_id)
     if result is None:
-        raise HTTPException(status_code=404, detail="Tag not found")
+        raise HTTPException(status_code=404, detail="User tags not found")
     return result
 
 
-@router.put("/{tag}", response_model=Tag)
-async def update(tag: str, data: TagUpdate):
-    result = await update_tag(tag, data)
+@router.put("/{user_id}", response_model=Tag)
+async def update(user_id: str, data: TagUpdate):
+    result = await update_tag(user_id, data)
     if result is None:
-        raise HTTPException(status_code=404, detail="Tag not found")
+        raise HTTPException(status_code=404, detail="User tags not found")
     return result
 
 
-@router.delete("/{tag}", status_code=status.HTTP_204_NO_CONTENT)
-async def destroy(tag: str):
-    success = await delete_tag(tag)
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def destroy(user_id: str):
+    success = await delete_tag(user_id)
     if not success:
-        raise HTTPException(status_code=404, detail="Tag not found")
+        raise HTTPException(status_code=404, detail="User tags not found")
