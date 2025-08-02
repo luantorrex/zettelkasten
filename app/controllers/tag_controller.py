@@ -16,7 +16,7 @@ dynamodb = boto3.resource(
     aws_secret_access_key=os.getenv("AWS_SECRET_ACCESS_KEY"),
 )
 
-table_name = os.getenv("DYNAMO_TABLE", "zetteltasken-tags-1")
+table_name = os.getenv("DYNAMO_TABLE", "zettelkasten-tags-1")
 table = dynamodb.Table(table_name)
 
 
