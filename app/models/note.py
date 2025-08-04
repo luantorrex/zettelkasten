@@ -7,6 +7,7 @@ class NoteBase(BaseModel):
     title: str
     content: str
     userId: str
+    note_parent_id: Optional[str] = None
 
 
 class NoteCreate(NoteBase):
@@ -17,6 +18,7 @@ class NoteUpdate(BaseModel):
     title: Optional[str] = None
     content: Optional[str] = None
     userId: Optional[str] = None
+    note_parent_id: Optional[str] = None
 
 
 class Note(NoteBase):
@@ -32,6 +34,12 @@ class Note(NoteBase):
 
     @field_validator("userId", mode="before")
     def convert_userId(cls, v):
+        if isinstance(v, ObjectId):
+            return str(v)
+        return v
+
+    @field_validator("note_parent_id", mode="before")
+    def convert_note_parent_id(cls, v):
         if isinstance(v, ObjectId):
             return str(v)
         return v
